@@ -5,13 +5,16 @@
 #include<sstream>
 #include<cstdlib>
 #include<time.h>
+#include<cstring>
+
 using std::cout;
+using std::cerr;
 using std::ifstream;
 using std::string;
 using std::stringstream;
 
-char values[] = "abcdefghijklmnopqrstuvwxyz., \n?!:";
-const int valuecount = sizeof(values);
+const char *values = "abcdefghijklmnopqrstuvwxyz., \n?!:;-\"";
+int valuecount = 36;
 int charcount = 4;
 
 uint16_t **tdata;
@@ -120,26 +123,80 @@ void generate(int count){
 	delete current;
 }
 
-int main(){
+void print_usage(){
+
+}
+
+int main(int argn, const char** args){
+	const char* filename = "\0";
+	int verbosity = 0;
+	int generatelength = 8192;
+	// parse arguments
+	int index = 1;
+	while (index < argn){
+		if (strcmp(args[index], "-f") == 0){
+			index++;
+			if (index == argn){
+				cerr<<"missing argument [filename] for -f flag\n";
+				return 1;
+			}
+			filename = args[index];
+		}
+		if (strcmp(args[index], "-v") == 0){
+			verbosity++;
+		}
+		if (strcmp(args[index], "-c") == 0){
+			index++;
+			if (index == argn){
+				cerr<<"missing argument [character set] for -c flag\n";
+				return 1;
+			}
+			values = args[index];
+			valuecount = strlen(values);
+		}
+		if (strcmp(args[index], "-l") == 0){
+			index++;
+			if (index == argn){
+				cerr<<"missing argument [generation length] for -l flag\n";
+				return 1;
+			}
+			generatelength = atoi(args[index]);
+		}
+		index++; 
+	}
+
 	srand(time(NULL));
-	ifstream file = ifstream("data.txt");
+	ifstream file = ifstream(filename);
 	if (!file.good()){
-		cout<<"unable to open/read file \"data\"\n";
+		cerr<<"unable to open/read file '"<<filename<<"'\n";
 		return -1;
 	}
-	cout<<"reading file\n";
+	
+	if (verbosity >= 1)
+		cout<<"reading file\n";
+	
 	stringstream buffer;
 	buffer << file.rdbuf();
-	cout<<"read "<<buffer.str().size()<<" characters\n";
+	
+	if (verbosity >= 1)
+		cout<<"read "<<buffer.str().size()<<" characters\n";
 
-	cout<<"allocating training memory ("<< pow(valuecount, charcount)*sizeof(uint16_t*) + pow(valuecount, charcount)*valuecount*sizeof(uint16_t) <<"B)\n";
+	if (verbosity >= 1)
+		cout<<"allocating training memory ("<< pow(valuecount, charcount)*sizeof(uint16_t*) + pow(valuecount, charcount)*valuecount*sizeof(uint16_t) <<"B)\n";
+
 	tdata = new uint16_t*[pow(valuecount, charcount)];
+	
 	for (int i=0; i<pow(valuecount, charcount); i++){
 		tdata[i] = new uint16_t[valuecount];
 	}
-	cout<<"allocation finished\n";
+
+	if (verbosity >= 1)
+		cout<<"allocation finished\n";
+
 	train(buffer.str());
-	generate(8192);
+	
+	generate(generatelength);
+	cout<<"\n";
 	
 	for (int i=0; i<pow(valuecount, charcount); i++){
 		delete tdata[i];
