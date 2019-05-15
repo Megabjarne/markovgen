@@ -4,9 +4,10 @@
 #include<string>
 #include<sstream>
 #include<cstdlib>
-#include<time.h>
+#include<ctime>
 #include<cstring>
 #include<map>
+#include<chrono>
 
 using std::cout;
 using std::cerr;
@@ -20,6 +21,7 @@ int valuecount = 36;
 int memorycount = 6;
 bool lowercasing = true;
 bool verbose = false;
+bool progressreport = false;
 
 map<string, map<char, uint32_t> > rules;
 
@@ -59,10 +61,21 @@ string clean(string data){
 }
 
 void train(string data){
-	for (int i=0; i<data.size()-valuecount; i++){
+	auto begin = std::chrono::steady_clock::now();
+
+	for (long i=0; i<data.size()-valuecount; i++){
+
+		if (progressreport && (!(i % std::max( (int)((data.size()-valuecount)/500), 1) ) || i == data.size()-valuecount-1)){
+			auto end = std::chrono::steady_clock::now();
+			long elapsedms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+			long opsleft = data.size() - valuecount - i;
+			long msleft = (elapsedms * opsleft) / ((i==0)?1:i);
+			cout<<"\rTraining "<<i<<"/"<<data.size()-valuecount<<" "<<(int)((i*100)/(data.size()-valuecount))<<"% Time: "<<(long)(elapsedms/1000)<<"s ETA: "<<(long)(msleft/1000)<<"s      "<<std::flush;
+		}
+
 		string index = data.substr(i, memorycount-1);
 		char indexc = data[i+memorycount-1];
-		
+
 		auto iter = rules.find(index);
 		if (iter == rules.end()){
 			rules[index] = map<char, uint32_t>();
@@ -76,6 +89,8 @@ void train(string data){
 			(it->second)++;
 		}
 	}
+	if (progressreport)
+		cout<<"\n";
 }
 
 string generate(int count){
@@ -93,7 +108,6 @@ string generate(int count){
 	if (verbose)
 		cout<<"generate seed: "<<index<<"\n";
 
-	cout<<"generated: ";
 	for (int i=0; i<count; i++){
 		auto charmap = rules[index];
 		int sum = 0;
@@ -164,6 +178,7 @@ void print_usage(const char *executablename){
 			"    --no-lowercase                 disables automatic conversion of characters to lowercase.\n"<<
 			"    -m [size]                      how many characters to take into consideration.\n"<<
 			"    -h | --help                    show this help message.\n"<<
+			"    -p | --progress                display progress bar while working\n"<<
 			"\n";
 }
 
@@ -222,9 +237,12 @@ int main(int argn, const char** args){
 			print_usage(args[0]);
 			exit(0);
 		}
-		index++; 
+		if (strcmp(args[index], "-p")==0 || strcmp(args[index], "--progress")==0){
+			progressreport = true;
+		}
+		index++;
 	}
-	
+
 	if (filename == nullptr){
 		cerr<<"Input file must be specified\n";
 		print_basic_usage(args[0]);
@@ -252,10 +270,22 @@ int main(int argn, const char** args){
 	if (verbose)
 		cout<<data.size()<<" characters left after cleaning\n";
 
+	if (verbose)
+		cout<<"starting training\n";
+
 	train(data);
-	
+
+	if (verbose)
+		cout<<"training finished\n";
+
+	if (verbose)
+		cout<<"generating text\n";
+
 	string result = generate(generatelength);
-	
+
+	if (verbose)
+		cout<<"text generation finished\n";
+
 	cout<<result<<"\n";
 	
 	exit(0);
