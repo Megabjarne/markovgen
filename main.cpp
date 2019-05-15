@@ -18,7 +18,7 @@ using std::map;
 const char *values = "abcdefghijklmnopqrstuvwxyz., \n?!:;-\"";
 int valuecount = 36;
 int memorycount = 6;
-bool lowercasing = false;
+bool lowercasing = true;
 bool verbose = false;
 
 map<string, map<char, uint32_t> > rules;
@@ -159,9 +159,9 @@ void print_usage(const char *executablename){
 	cout<<"\n"<<
 			"    -f [filename]                  file to be used for training data.\n"<<
 			"    -v | --verbose                 extra debug logging.\n"<<
-			"    -c | --characters [characters] set of characters allowed.\n"<<
+			"    -c | --characters [characters] set of characters allowed. by default \"abcdefghijklmnopqrstuvwxyz., \\n?!:;\"-\"\n"<<
 			"    -l [number]                    how many characters to generate.\n"<<
-			"    --lowercase                    converts all characters to lowercase.\n"<<
+			"    --no-lowercase                 disables automatic conversion of characters to lowercase.\n"<<
 			"    -m [size]                      how many characters to take into consideration.\n"<<
 			"    -h | --help                    show this help message.\n"<<
 			"\n";
@@ -206,8 +206,8 @@ int main(int argn, const char** args){
 			}
 			generatelength = atoi(args[index]);
 		}
-		if (strcmp(args[index], "--lowercase") == 0){
-			lowercasing = true;
+		if (strcmp(args[index], "--no-lowercase") == 0){
+			lowercasing = false;
 		}
 		if (strcmp(args[index], "-m") == 0){
 			index++;
