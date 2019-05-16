@@ -18,7 +18,7 @@ Active development
 
 - [x] Generate text from single input file
 - [x] Progress bar during training
-- [/] Allow arbitrary number of input files, as well as standard input
+- [ ] Allow arbitrary number of input files, as well as standard input
 - [ ] Allow saving and loading of models
 - [ ] Greater control over how model is interpreted and text is generated
 - [ ] Makefile and/or script for compiling and installing
