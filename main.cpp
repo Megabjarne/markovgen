@@ -265,10 +265,12 @@ int main(int argn, const char** args){
 				exit(1);
 			}
 			generatelength = atoi(args[index]);
-		}
+		}else
+		
 		if (strcmp(args[index], "--no-lowercase") == 0){
 			lowercasing = false;
-		}
+		}else
+		
 		if (strcmp(args[index], "-m") == 0){
 			index++;
 			if (index == argn){
