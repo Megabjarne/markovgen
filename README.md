@@ -8,7 +8,7 @@ There is only one code file, `main.cpp`, to compile it simply clone or download 
 
 ## How to use
 
-If you have a textfile `data.txt` you wish to use to generate text, you can simply run `./markovgen -f data.txt`, and it will use the default parameters and generate a bit of text.
+If you have a textfile `data.txt` you wish to use to generate text, you can simply run `./markovgen data.txt`, and it will use the default parameters and generate a bit of text.
 
 Run `./markovgen -h` or `./markovgen --help` for more information on what parameters can be set.
 
@@ -18,7 +18,7 @@ Active development
 
 - [x] Generate text from single input file
 - [x] Progress bar during training
-- [ ] Allow arbitrary number of input files, as well as standard input
+- [x] Allow arbitrary number of input files, as well as standard input
 - [ ] Allow saving and loading of models
 - [ ] Greater control over how model is interpreted and text is generated
 - [ ] Makefile and/or script for compiling and installing
